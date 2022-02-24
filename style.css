@@ -170,7 +170,9 @@ h3{
     width: 180px;
     height: 180px;
 }
-
+.selected{
+    border: 3px solid #404EED;
+}
 @media only screen and (max-width: 768px) {
     aside{
         display: none;
