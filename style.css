@@ -53,7 +53,7 @@ main section span{
 b{
     font-weight: bold;
 }
-.options-container1,.options-container2,.options-container3{
+.model-container,.neck-container,.material-container{
     display: flex;
     justify-content: space-between;
     margin-bottom: 30px;
