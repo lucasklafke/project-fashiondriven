@@ -1,6 +1,7 @@
 const person = window.prompt("qual seu nome")
 const input = document.querySelector(".image-reference input")
 let productRecipe = [false,false,false]
+let url = ''
 input.addEventListener("keyup",() =>{
     verifyForm()
 })
@@ -13,11 +14,10 @@ function getProducts(){
 }
 function caseSuccess(response){
     const infos = response.data
-    console.log(infos)
     renderProducts(infos)
 }
 function caseError(){
-    console.log("deuruim")
+    window.alert("Houve um erro ao carregar os produtos! Recarregue a página ou continue navegando :)")
 }
 function renderProducts(infos){
     const productContainer = document.querySelector(".product-container")
@@ -58,6 +58,7 @@ function verifyInput(){
     const jpg = /.jpg$/.test(link)
     if (https){
         if (png || jpg){
+            url = link
             return true
         }
     }
@@ -77,7 +78,7 @@ function verifyProductForm(){
         let arrayChildren = arrayModel[i].children
         for(c = 0; c < arrayChildren.length;c++){
             if(arrayChildren[c].classList.contains("selected")){
-                productRecipe[0] = arrayModel[i]
+                productRecipe[0] = arrayChildren[1]
                 verifyModelIsTrue = true
             }
         }
@@ -87,7 +88,7 @@ function verifyProductForm(){
         let arrayChildren = arrayNeck[i].children
         for(c = 0; c < arrayChildren.length;c++){
             if(arrayChildren[c].classList.contains("selected")){
-                productRecipe[1] = arrayNeck[i]
+                productRecipe[1] = arrayChildren[1]
                 verifyNeckIsTrue = true
             }
         }
@@ -99,7 +100,7 @@ function verifyProductForm(){
         let arrayChildren = arrayMaterial[i].children
         for(c = 0; c < arrayChildren.length;c++){
             if(arrayChildren[c].classList.contains("selected")){
-                productRecipe[2] = arrayMaterial[i]
+                productRecipe[2] = arrayChildren[1]
                 verifyMaterialIsTrue = true
             }
         }
@@ -114,6 +115,24 @@ function turnPostButtonAvaible(){
     finishButton.setAttribute("onclick","postProduct()")
 }
 function postProduct(){
+    const model = productRecipe[0].textContent
+    const neck = productRecipe[1].textContent
+    const material = productRecipe[2].textContent
+    const object = {
+        "model": model,
+        "neck": neck,
+        "material": material,
+        "image": url,
+        "owner": person,
+        "author": person
+    }
+
+    const promise = axios.post('https://mock-api.driven.com.br/api/v4/shirts-api/shirts',object)
+    promise.then(() => {window.alert("produto postado!")})
+    promise.catch((response) =>{
+        window.alert("Houve algum erro!, tente novamente mais tarde :)")
+        getProducts()
+    })
     
 }
 function clearProductInfos(){
@@ -126,5 +145,7 @@ function verifyForm(){
         turnPostButtonAvaible()
     }
 }
+
+
 getProducts()
 setInterval(getProducts,3000)
