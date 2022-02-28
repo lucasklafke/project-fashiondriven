@@ -15,7 +15,6 @@ function getProducts(){
 }
 function caseSuccess(response){
     const infos = response.data
-    console.log(infos)
     renderProducts(infos)
 }
 function caseError(){
@@ -136,9 +135,7 @@ function createProductObject(requestedProduct){
             "owner": person,
             "author": person
         }
-        console.log(object)
     }else{
-        console.log(object)
         const model = requestedProduct.model
         const neck = requestedProduct.neck
         const material = requestedProduct.material
@@ -150,12 +147,10 @@ function createProductObject(requestedProduct){
             "owner": requestedProduct.owner,
             "author": person
         }
-        console.log(object)
     }
     postProduct(object)
 }
 function postProduct(object){
-    console.log(object)
     const promise = axios.post('https://mock-api.driven.com.br/api/v4/shirts-api/shirts',object)
     promise.then(() => {
         window.alert("produto postado!") 
