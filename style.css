@@ -212,3 +212,12 @@ h3{
         margin-left: 8px;
     }
 }
+.window-confirm{
+    width: 340px;
+    height: 340px;
+    background-color: #232323;
+    position: absolute;
+    right: 50%;
+    top: 25%;
+    display: none;
+}

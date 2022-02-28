@@ -2,6 +2,7 @@ const person = window.prompt("qual seu nome")
 const input = document.querySelector(".image-reference input")
 let productRecipe = [false,false,false]
 let url = ''
+let id = 0
 input.addEventListener("keyup",() =>{
     verifyForm()
 })
@@ -14,6 +15,7 @@ function getProducts(){
 }
 function caseSuccess(response){
     const infos = response.data
+    console.log(infos)
     renderProducts(infos)
 }
 function caseError(){
@@ -24,7 +26,7 @@ function renderProducts(infos){
     productContainer.innerHTML = ''
     for(i = 0; i < infos.length;i++)
     productContainer.innerHTML += `
-    <div class="product">
+    <div class="product" id='${infos[i].id}' onclick="requestExistingProduct(this)">
     <img src="${infos[i].image}" alt="">
     <span><b>criador:</b> ${infos[i].owner}</span>
     </div>
@@ -53,10 +55,11 @@ function selectOption(element){
 }
 function verifyInput(){
     const link = input.value
-    const https = /^https/.test(link)
+    const https = /^https:/.test(link)
+    const http = /^http:/.test(link)
     const png = /.png$/.test(link)
     const jpg = /.jpg$/.test(link)
-    if (https){
+    if (https || http){
         if (png || jpg){
             url = link
             return true
@@ -83,6 +86,7 @@ function verifyProductForm(){
             }
         }
     }
+
     let verifyNeckIsTrue = false
     for(i = 0; i < arrayNeck.length;i++){
         let arrayChildren = arrayNeck[i].children
@@ -94,7 +98,6 @@ function verifyProductForm(){
         }
     }
 
-    
     let verifyMaterialIsTrue = false
     for(i = 0; i < arrayMaterial.length;i++){
         let arrayChildren = arrayMaterial[i].children
@@ -112,28 +115,57 @@ function verifyProductForm(){
 function turnPostButtonAvaible(){
     const finishButton = document.querySelector(".image-reference button")
     finishButton.style.backgroundColor = '#404EED'
-    finishButton.setAttribute("onclick","postProduct()")
+    finishButton.setAttribute("onclick","createProductObject()")
 }
-function postProduct(){
-    const model = productRecipe[0].textContent
-    const neck = productRecipe[1].textContent
-    const material = productRecipe[2].textContent
-    const object = {
-        "model": model,
-        "neck": neck,
-        "material": material,
-        "image": url,
-        "owner": person,
-        "author": person
+function turnPostButtonunavailable(){
+    const finishButton = document.querySelector(".image-reference button")
+    finishButton.style.backgroundColor = '#C4C4C4'
+    finishButton.setAttribute("onclick","")
+}
+function createProductObject(requestedProduct){
+    let object = 0
+    if(id == 0){
+        const model = productRecipe[0].textContent
+        const neck = productRecipe[1].textContent
+        const material = productRecipe[2].textContent
+        object = {
+            "model": model,
+            "neck": neck,
+            "material": material,
+            "image": url,
+            "owner": person,
+            "author": person
+        }
+        console.log(object)
+    }else{
+        console.log(object)
+        const model = requestedProduct.model
+        const neck = requestedProduct.neck
+        const material = requestedProduct.material
+        object = {
+            "model": model,
+            "neck": neck,
+            "material": material,
+            "image": requestedProduct.image,
+            "owner": requestedProduct.owner,
+            "author": person
+        }
+        console.log(object)
     }
-
+    postProduct(object)
+}
+function postProduct(object){
+    console.log(object)
     const promise = axios.post('https://mock-api.driven.com.br/api/v4/shirts-api/shirts',object)
-    promise.then(() => {window.alert("produto postado!")})
-    promise.catch((response) =>{
-        window.alert("Houve algum erro!, tente novamente mais tarde :)")
+    promise.then(() => {
+        window.alert("produto postado!") 
         getProducts()
     })
-    
+    promise.catch((response) =>{
+        window.alert("Ops, não conseguimos processar sua encomenda")
+        getProducts()
+    })
+    id = 0
 }
 function clearProductInfos(){
     productRecipe = []
@@ -143,9 +175,29 @@ function verifyForm(){
     const inputIsTrue = verifyInput()
     if(productFormIsTrue && inputIsTrue){
         turnPostButtonAvaible()
+    } else{
+        turnPostButtonunavailable()
     }
 }
-
+function requestExistingProduct(element){
+    const acceptRequest = window.confirm('quer confirmar o pedido?')
+    if(acceptRequest){
+        id = element.getAttribute("id")
+        const promise = axios.get("https://mock-api.driven.com.br/api/v4/shirts-api/shirts")
+        promise.then(checkProductRequestedId)
+        promise.catch(caseError)
+    }
+}
+function checkProductRequestedId(response){
+    const infos = (response.data)
+    let requestedProduct = 0
+    for(i = 0; i < infos.length; i++){
+        if(infos[i].id == id){
+            requestedProduct = infos[i]
+        }
+    }
+    createProductObject(requestedProduct)
+}
 
 getProducts()
-setInterval(getProducts,3000)
+// setInterval(getProducts,3000)
